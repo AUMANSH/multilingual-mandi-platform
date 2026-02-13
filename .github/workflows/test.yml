@@ -9,6 +9,14 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+
+    # 🔥 ADD THIS ENTIRE ENV BLOCK
+    env:
+      SECRET_KEY: test_secret
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mandi_platform
+      REDIS_URL: redis://localhost:6379/1
+      ELASTICSEARCH_URL: http://localhost:9200
+
     strategy:
       matrix:
         python-version: [3.11, 3.12]
@@ -74,11 +82,8 @@ jobs:
 
     - name: Wait for services
       run: |
-        # Wait for PostgreSQL
         until pg_isready -h localhost -p 5432; do sleep 1; done
-        # Wait for Redis
         until redis-cli -h localhost -p 6379 ping; do sleep 1; done
-        # Wait for Elasticsearch
         until curl -f http://localhost:9200/_cluster/health; do sleep 1; done
 
     - name: Run linting
@@ -102,10 +107,6 @@ jobs:
     - name: Run integration tests
       run: |
         pytest tests/ -v -m "integration" --cov=src/mandi_platform --cov-append --cov-report=xml
-      env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mandi_platform
-        REDIS_URL: redis://localhost:6379/1
-        ELASTICSEARCH_URL: http://localhost:9200
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -117,6 +118,14 @@ jobs:
 
   property-test-extended:
     runs-on: ubuntu-latest
+
+    # 🔥 ADD ENV HERE ALSO
+    env:
+      SECRET_KEY: test_secret
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_mandi_platform
+      REDIS_URL: redis://localhost:6379/1
+      ELASTICSEARCH_URL: http://localhost:9200
+
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
